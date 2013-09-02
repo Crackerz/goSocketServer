@@ -1,14 +1,13 @@
-package main
+package goSocketServer
 
 import ("fmt"
 	"io"
-	"strconv"
 	"code.google.com/p/go.net/websocket"
 )
 
 type Socket struct {
 	Connection *websocket.Conn
-	id int
+	Id int
 }
 
 func (s *Socket) Handle() {
@@ -19,19 +18,17 @@ func (s *Socket) Handle() {
 
 //Register the socket with the server
 func (s *Socket) Register() {
-	(*s).id = Server.add(*s)
-	Server.WriteAll("Anon "+strconv.Itoa((*s).id)+" joined")
+	(*s).Id = Server.add(*s)
 }
 
 //Cleanup server after loosing connection with socket
 func (s *Socket) Disconnect() {
-	Server.remove((*s).id)
-	Server.WriteAll("Anon "+strconv.Itoa((*s).id)+" disconnected")
+	Server.remove((*s).Id)
 }
 
 func (s Socket) Write(p []byte) (n int, err error) {
 	fmt.Printf("Write Called\n")
-	Server.WriteAll("Anon "+strconv.Itoa(s.id)+":"+string(p))
+	Server.WriteAll(string(p))
 	fmt.Printf("Write Completed\n")
 	return len(p), nil
 }

@@ -1,10 +1,14 @@
-package main
+package goSocketServer
 
-import("fmt")
+import(
+	"fmt"
+	"io/ioutil"
+)
 
 type SocketServer struct {
 	sockets map[int]Socket
 	uniq_id int
+	program string
 }
 
 var Server SocketServer
@@ -14,10 +18,23 @@ func init() {
 	Server.uniq_id = 0
 }
 
+func SetProgram(filename string) {
+	Server.SetProgram(filename)
+}
+
+func (s *SocketServer) SetProgram(filename string) {
+	clientProgram,err:=ioutil.ReadFile(filename)
+	if err!=nil {
+		panic(err.Error())
+	}
+	(*s).program = string(clientProgram)
+}
+
 func (s *SocketServer) add(socket Socket) int {
 	s.sockets[s.uniq_id] = socket
 	s.uniq_id++
 	printArray("Server", (*s).sockets)
+	socket.WriteString("obj ="+ (*s).program)
 	return Server.uniq_id-1
 }
 
