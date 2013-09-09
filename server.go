@@ -2,13 +2,13 @@ package goSocketServer
 
 import(
 	"fmt"
-	"io/ioutil"
 )
 
 type SocketServer struct {
 	sockets map[int]Socket
 	uniq_id int
-	program string
+	onConnect func(*Socket)
+	onDisconnect func()
 }
 
 var Server SocketServer
@@ -18,27 +18,15 @@ func init() {
 	Server.uniq_id = 0
 }
 
-func SetProgram(filename string) {
-	Server.SetProgram(filename)
-}
-
-func (s *SocketServer) SetProgram(filename string) {
-	clientProgram,err:=ioutil.ReadFile(filename)
-	if err!=nil {
-		panic(err.Error())
-	}
-	(*s).program = string(clientProgram)
-}
-
 func (s *SocketServer) add(socket Socket) int {
 	s.sockets[s.uniq_id] = socket
 	s.uniq_id++
-	printArray("Server", (*s).sockets)
-	socket.WriteString("obj ="+ (*s).program)
+	s.onConnect(&socket)
 	return Server.uniq_id-1
 }
 
 func (s *SocketServer) remove(index int) {
+	(*s).onDisconnect()
 	delete(s.sockets,index)
 }
 
@@ -50,4 +38,16 @@ func (s *SocketServer) WriteAll(message string) {
 	for _,socket := range s.sockets {
 		socket.WriteString(message)
 	}
+}
+
+func (s *SocketServer) OnConnect(function func(*Socket)) {
+	s.onConnect = function
+}
+
+func (s *SocketServer) Test() {
+	fmt.Println(s.onConnect)
+}
+
+func (s *SocketServer) OnDisconnect(function func()) {
+	s.onDisconnect = function
 }
