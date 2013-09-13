@@ -1,2 +1,2 @@
-jsBeowulfServer
+goSocketServer
 ===============
