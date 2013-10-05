@@ -5,28 +5,30 @@ import(
 )
 
 type SocketServer struct {
-	sockets map[int]Socket
+	sockets map[int]*Socket
 	uniq_id int
 	onConnect func(*Socket)
-	onDisconnect func()
+	onDisconnect func(*Socket)
 }
 
 var Server SocketServer
 
 func init() {
-	Server.sockets = make(map[int]Socket)
+	Server.sockets = make(map[int]*Socket)
 	Server.uniq_id = 0
 }
 
 func (s *SocketServer) add(socket Socket) int {
-	s.sockets[s.uniq_id] = socket
+	s.sockets[s.uniq_id] = &socket
+	socket.id = s.uniq_id
 	s.uniq_id++
 	s.onConnect(&socket)
 	return Server.uniq_id-1
 }
 
 func (s *SocketServer) remove(index int) {
-	(*s).onDisconnect()
+	socket:=s.sockets[index]
+	(*s).onDisconnect(socket)
 	delete(s.sockets,index)
 }
 
@@ -44,10 +46,6 @@ func (s *SocketServer) OnConnect(function func(*Socket)) {
 	s.onConnect = function
 }
 
-func (s *SocketServer) Test() {
-	fmt.Println(s.onConnect)
-}
-
-func (s *SocketServer) OnDisconnect(function func()) {
+func (s *SocketServer) OnDisconnect(function func(*Socket)) {
 	s.onDisconnect = function
 }
