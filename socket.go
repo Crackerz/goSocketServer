@@ -30,13 +30,19 @@ func (s *Socket) Disconnect() {
 	Server.remove(s.id)
 }
 
-func (s Socket) Write(p []byte) (n int, err error) {
-	Server.WriteAll(string(p))
+func (s *Socket) Write(p []byte) (n int, err error) {
+	if Server.onMessage != nil {
+		Server.onMessage(s,p)
+	}
 	return len(p), nil
 }
 
-func (s *Socket) WriteString(message string) {
+func (s *Socket) SendString(message string) {
 	fmt.Fprintf(s.Connection,message)
+}
+
+func (s *Socket) SendBytes(message []byte) {
+	fmt.Fprintf(s.Connection,"%s",message)
 }
 
 func NewSocket(ws *websocket.Conn) Socket {

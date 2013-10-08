@@ -1,14 +1,11 @@
 package goSocketServer
 
-import(
-	"fmt"
-)
-
 type SocketServer struct {
 	sockets map[int]*Socket
 	uniq_id int
 	onConnect func(*Socket)
 	onDisconnect func(*Socket)
+	onMessage func(*Socket,[]byte)
 }
 
 var Server SocketServer
@@ -22,23 +19,23 @@ func (s *SocketServer) add(socket Socket) int {
 	s.sockets[s.uniq_id] = &socket
 	socket.id = s.uniq_id
 	s.uniq_id++
-	s.onConnect(&socket)
+	if s.onConnect != nil {
+		s.onConnect(&socket)
+	}
 	return Server.uniq_id-1
 }
 
 func (s *SocketServer) remove(index int) {
 	socket:=s.sockets[index]
-	(*s).onDisconnect(socket)
+	if s.onDisconnect!=nil {
+		s.onDisconnect(socket)
+	}
 	delete(s.sockets,index)
-}
-
-func printArray(name string, array map[int]Socket) {
-	fmt.Println(name, " len:", len(array), " ", array)
 }
 
 func (s *SocketServer) WriteAll(message string) {
 	for _,socket := range s.sockets {
-		socket.WriteString(message)
+		socket.SendString(message)
 	}
 }
 
@@ -48,4 +45,8 @@ func (s *SocketServer) OnConnect(function func(*Socket)) {
 
 func (s *SocketServer) OnDisconnect(function func(*Socket)) {
 	s.onDisconnect = function
+}
+
+func (s *SocketServer) OnMessage(function func(*Socket, []byte)) {
+	s.onMessage = function
 }
