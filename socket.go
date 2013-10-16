@@ -1,8 +1,9 @@
 package goSocketServer
 
-import ("fmt"
-	"io"
+import (
 	"code.google.com/p/go.net/websocket"
+	"fmt"
+	"io"
 )
 
 /*
@@ -10,7 +11,7 @@ Socket is a simple structure that wraps the functionality of a websocket.Conn, a
 */
 type Socket struct {
 	Connection *websocket.Conn
-	id int
+	id         int
 }
 
 /*
@@ -18,7 +19,7 @@ Handle() is a blocking function that handles all communication with the websocke
 */
 func (s *Socket) Handle() {
 	s.Register()
-	io.Copy(s,s.Connection) //Blocking function to handle all communication
+	io.Copy(s, s.Connection) //Blocking function to handle all communication
 	s.Disconnect()
 }
 
@@ -48,7 +49,7 @@ Write() is called when a message is received from the websocket. Write() DOES NO
 */
 func (s *Socket) Write(p []byte) (n int, err error) {
 	if Server.onMessage != nil {
-		Server.onMessage(s,p)
+		Server.onMessage(s, p)
 	}
 	return len(p), nil
 }
@@ -57,19 +58,19 @@ func (s *Socket) Write(p []byte) (n int, err error) {
 SendString() sends a message to the websocket.
 */
 func (s *Socket) SendString(message string) {
-	fmt.Fprintf(s.Connection,message)
+	fmt.Fprintf(s.Connection, message)
 }
 
 /*
 SendBytes() sends a message to the websocket.
 */
 func (s *Socket) SendBytes(message []byte) {
-	fmt.Fprintf(s.Connection,"%s",message)
+	fmt.Fprintf(s.Connection, "%s", message)
 }
 
 /*
 NewSocket() creates a new Socket structure that wraps the websocket. The unique ID will be 0 and is assigned when the Socket is registered with a server.
 */
 func NewSocket(ws *websocket.Conn) Socket {
-	return Socket{ws,0}
+	return Socket{ws, 0}
 }

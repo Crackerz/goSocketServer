@@ -7,11 +7,11 @@ package goSocketServer
 SocketServer manages connecting, disconnecting, and handling messages from all websockets registered with it.
 */
 type SocketServer struct {
-	sockets map[int]*Socket //a map of all Sockets the server is monitoring w/ their IDs as keys.
-	uniq_id int //Used for generating unique IDs
-	onConnect func(*Socket)
+	sockets      map[int]*Socket //a map of all Sockets the server is monitoring w/ their IDs as keys.
+	uniq_id      int             //Used for generating unique IDs
+	onConnect    func(*Socket)
 	onDisconnect func(*Socket)
-	onMessage func(*Socket,[]byte)
+	onMessage    func(*Socket, []byte)
 }
 
 /*
@@ -34,25 +34,25 @@ func (s *SocketServer) add(socket Socket) int {
 	if s.onConnect != nil {
 		s.onConnect(&socket)
 	}
-	return Server.uniq_id-1
+	return Server.uniq_id - 1
 }
 
 /*
 remove() stops the server from monitoring a websocket with the specified.
 */
 func (s *SocketServer) remove(id int) {
-	socket:=s.sockets[id]
-	if s.onDisconnect!=nil {
+	socket := s.sockets[id]
+	if s.onDisconnect != nil {
 		s.onDisconnect(socket)
 	}
-	delete(s.sockets,id)
+	delete(s.sockets, id)
 }
 
 /*
 WriteAll() sends the string "message" to all sockets currently connected to the server.
 */
 func (s *SocketServer) WriteAll(message string) {
-	for _,socket := range s.sockets {
+	for _, socket := range s.sockets {
 		socket.SendString(message)
 	}
 }
